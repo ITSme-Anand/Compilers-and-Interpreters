@@ -80,184 +80,367 @@ class Lexer(object):
         # self.pos is an index into self.text
         self.pos = 0
         self.current_char = self.text[self.pos]
+        self.virtual_pos = 0
+        self.virtual_char = self.text[self.virtual_pos]
 
     def error(self):
         raise Exception('Invalid character')
 
-    def advance(self):
+    def advance(self , onlyPeek = False):
         """Advance the `pos` pointer and set the `current_char` variable."""
-        self.pos += 1
-        if self.pos > len(self.text) - 1:
-            self.current_char = None  # Indicates end of input
+        if(onlyPeek==False):
+            self.pos += 1
+            if self.pos > len(self.text) - 1:
+                self.current_char = None  # Indicates end of input
+            else:
+                self.current_char = self.text[self.pos]
         else:
-            self.current_char = self.text[self.pos]
+            self.virtual_pos+=1
+            if self.virtual_pos > len(self.text) - 1:
+                self.virtual_char = None  # Indicates end of input
+            else:
+                self.virtual_char = self.text[self.virtual_pos]
+                """ print('current virtual character after space removal is' , self.virtual_char)
+                print('self pos is ', self.pos)
+                print('self virtual pos is', self.virtual_pos) """
 
-    def peek(self):
+    def peek(self ):
         peek_pos = self.pos + 1
         if peek_pos > len(self.text) - 1:
             return None
         else:
             return self.text[peek_pos]
 
-    def skip_whitespace(self):
-        while self.current_char is not None and self.current_char.isspace():
-            self.advance()
+    def skip_whitespace(self, onlyPeek = False):
+        if(onlyPeek==False):
+            while self.current_char is not None and self.current_char.isspace():
+                self.advance()
+        else:
+            while self.virtual_char is not None and self.virtual_char.isspace():
+                self.advance(True)
+                
+        
+    def skip_comment(self , onlyPeek = False):
+        if onlyPeek==False:
+            while self.current_char != '*' or self.peek() != '/':
+                self.advance()
+            self.advance() # close the asterik
+            self.advance() # close the forward slash
+        else:
+            while self.virtual_char!= '*' or self.text[self.virtual_pos+1]!= '/':
+                self.advance(True)
+            self.advance(True)
+            self.advance(True)
 
-    def skip_comment(self):
-        while self.current_char != '*' or self.peek() != '/':
-            self.advance()
-        self.advance() # close the asterik
-        self.advance() # close the forward slash
-
-    def number(self):
+    def number(self, onlyPeek = False):
         """Return a (multidigit) integer or float consumed from the input."""
-        result = ''
-        while self.current_char is not None and self.current_char.isdigit():
-            result += self.current_char
-            self.advance()
-
-        if self.current_char == '.':
-            result += self.current_char
-            self.advance()
-
-            while (
-                self.current_char is not None and
-                self.current_char.isdigit()
-            ):
+        if onlyPeek==False:
+            result = ''
+            while self.current_char is not None and self.current_char.isdigit():
                 result += self.current_char
                 self.advance()
 
-            token = Token('FLOAT_CONST', float(result))
+            if self.current_char == '.':
+                result += self.current_char
+                self.advance()
+
+                while (
+                    self.current_char is not None and
+                    self.current_char.isdigit()
+                ):
+                    result += self.current_char
+                    self.advance()
+
+                token = Token('FLOAT_CONST', float(result))
+            else:
+                token = Token('INTEGER_CONST', int(result))
+
+            return token
         else:
-            token = Token('INTEGER_CONST', int(result))
+            result = ''
+            while self.virtual_char is not None and self.virtual_char.isdigit():
+                result += self.virtual_char
+                self.advance(True)
 
-        return token
+            if self.virtual_char == '.':
+                result += self.virtual_char
+                self.advance(True)
 
-    def _id(self):
+                while (
+                    self.virtual_char is not None and
+                    self.virtual_char.isdigit()
+                ):
+                    result += self.virtual_char
+                    self.advance(True)
+
+                token = Token('FLOAT_CONST', float(result))
+            else:
+                token = Token('INTEGER_CONST', int(result))
+
+            return token
+            
+
+    def _id(self , onlyPeek = False):
         """Handle identifiers and reserved keywords"""
-        result = ''
-        while self.current_char is not None and self.current_char.isalnum():
-            result += self.current_char
-            self.advance()
+        if(onlyPeek==False):
+            result = ''
+            while self.current_char is not None and self.current_char.isalnum():
+                result += self.current_char
+                self.advance()
 
-        token = RESERVED_KEYWORDS.get(result, Token(ID, result))
-        return token
+            token = RESERVED_KEYWORDS.get(result, Token(ID, result))
+            return token
+        else:
+            result = ''
+            while self.virtual_char is not None and self.virtual_char.isalnum():
+                print(self.virtual_char)
+                result += self.virtual_char
+                self.advance(True)
 
-    def get_next_token(self):
+            token = RESERVED_KEYWORDS.get(result, Token(ID, result))
+            return token
+
+    
+    def get_next_token(self, onlyPeek = False):
         """Lexical analyzer (also known as scanner or tokenizer)
 
         This method is responsible for breaking a sentence
         apart into tokens. One token at a time.
         """
-        while self.current_char is not None:
+        if onlyPeek==False:
+            while self.current_char is not None:
 
-            if self.current_char.isspace():
-                self.skip_whitespace()
-                continue
+                if self.current_char.isspace():
+                    self.skip_whitespace(onlyPeek)
+                    continue
 
-            if self.current_char == '/'  and self.peek() == '*':
-                self.advance()
-                self.advance()
-                self.skip_comment()
-                continue
+                if self.current_char == '/'  and self.peek() == '*':
+                    self.advance(onlyPeek)
+                    self.advance(onlyPeek)
+                    self.skip_comment(onlyPeek)
+                    continue
 
-            if self.current_char.isalpha():
-                return self._id()
+                if self.current_char.isalpha():
+                    return self._id(onlyPeek)
 
-            if self.current_char.isdigit():
-                return self.number()
+                if self.current_char.isdigit():
+                    return self.number(onlyPeek)
 
-            
-            if  self.current_char == '=' and self.peek() == '=':
-                self.advance()
-                self.advance()
-                return  Token(EQ, '==')
-            
-            if  self.current_char == '!' and self.peek() == '=':
-                self.advance()
-                self.advance()
-                return Token(NEQ, '!=')
-            
-            if  self.current_char  == '<' and self.peek() == '=':
-                self.advance()
-                self.advance()
-                return Token(LTE, '<=')
-            
-            if  self.current_char  == '<':
-                self.advance()
-                return Token(LT, '<')
-            
-            if  self.current_char  == '>' and self.peek() == '=':
-                self.advance()
-                self.advance()
-                return Token(GTE, '>=')
-            
-            if  self.current_char  == '>':
-                self.advance()
-                return Token(GT, '>')
-            
-            if  self.current_char == '&' and self.peek() == '&':
-                self.advance()
-                self.advance()
-                return Token(AND, '&&')
-            
-            if   self.current_char == '|' and self.peek() == '|':
-                self.advance()
-                self.advance()
-                return Token(OR, '||')
                 
-            if self.current_char == '=':
-                self.advance()
-                return Token(ASSIGN, '=')
+                if  self.current_char == '=' and self.peek() == '=':
+                    self.advance(onlyPeek)
+                    self.advance(onlyPeek)
+                    return  Token(EQ, '==')
+                
+                if  self.current_char == '!' and self.peek() == '=':
+                    self.advance(onlyPeek)
+                    self.advance(onlyPeek)
+                    return Token(NEQ, '!=')
+                
+                if  self.current_char  == '<' and self.peek() == '=':
+                    self.advance(onlyPeek)
+                    self.advance(onlyPeek)
+                    return Token(LTE, '<=')
+                
+                if  self.current_char  == '<':
+                    self.advance(onlyPeek)
+                    return Token(LT, '<')
+                
+                if  self.current_char  == '>' and self.peek() == '=':
+                    self.advance(onlyPeek)
+                    self.advance(onlyPeek)
+                    return Token(GTE, '>=')
+                
+                if  self.current_char  == '>':
+                    self.advance(onlyPeek)
+                    return Token(GT, '>')
+                
+                if  self.current_char == '&' and self.peek() == '&':
+                    self.advance(onlyPeek)
+                    self.advance(onlyPeek)
+                    return Token(AND, '&&')
+                
+                if   self.current_char == '|' and self.peek() == '|':
+                    self.advance(onlyPeek)
+                    self.advance(onlyPeek)
+                    return Token(OR, '||')
+                    
+                if self.current_char == '=':
+                    self.advance(onlyPeek)
+                    return Token(ASSIGN, '=')
 
-            if self.current_char == ';':
-                self.advance()
-                return Token(SEMI, ';')
+                if self.current_char == ';':
+                    self.advance(onlyPeek)
+                    return Token(SEMI, ';')
 
-            if self.current_char == ':':
-                self.advance()
-                return Token(COLON, ':')
+                if self.current_char == ':':
+                    self.advance(onlyPeek)
+                    return Token(COLON, ':')
 
-            if self.current_char == ',':
-                self.advance()
-                return Token(COMMA, ',')
+                if self.current_char == ',':
+                    self.advance(onlyPeek)
+                    return Token(COMMA, ',')
 
-            if self.current_char == '+':
-                self.advance()
-                return Token(PLUS, '+')
+                if self.current_char == '+':
+                    self.advance(onlyPeek)
+                    return Token(PLUS, '+')
 
-            if self.current_char == '-':
-                self.advance()
-                return Token(MINUS, '-')
+                if self.current_char == '-':
+                    self.advance(onlyPeek)
+                    return Token(MINUS, '-')
 
-            if self.current_char == '*':
-                self.advance()
-                return Token(MUL, '*')
+                if self.current_char == '*':
+                    self.advance(onlyPeek)
+                    return Token(MUL, '*')
 
-            if self.current_char == '/':
-                self.advance()
-                return Token(INTEGER_DIV, '/')
+                if self.current_char == '/':
+                    self.advance(onlyPeek)
+                    return Token(INTEGER_DIV, '/')
 
-            if self.current_char == '(':
-                self.advance()
-                return Token(LPAREN, '(')
+                if self.current_char == '(':
+                    self.advance(onlyPeek)
+                    return Token(LPAREN, '(')
 
-            if self.current_char == ')':
-                self.advance()
-                return Token(RPAREN, ')')
+                if self.current_char == ')':
+                    self.advance(onlyPeek)
+                    return Token(RPAREN, ')')
+                
+                if self.current_char == '{':
+                    self.advance(onlyPeek)
+                    return Token(LCURLY, '{')
+
+                if  self.current_char == '}':
+                    self.advance(onlyPeek)
+                    return Token(RCURLY, '}')
+                        
+                self.error()
+
+            return Token(EOF, None)
+        else:
+            while self.virtual_char is not None:
+
+                if self.virtual_char.isspace():
+                    self.skip_whitespace(onlyPeek)
+                    continue
+
+                if self.virtual_char == '/'  and self.peek() == '*':
+                    self.advance(onlyPeek)
+                    self.advance(onlyPeek)
+                    self.skip_comment(onlyPeek)
+                    continue
+
+                if self.virtual_char.isalpha():
+                    return self._id(onlyPeek)
+
+                if self.virtual_char.isdigit():
+                    return self.number(onlyPeek)
+
+                
+                if  self.virtual_char == '=' and self.peek() == '=':
+                    self.advance(onlyPeek)
+                    self.advance(onlyPeek)
+                    return  Token(EQ, '==')
+                
+                if  self.virtual_char == '!' and self.peek() == '=':
+                    self.advance(onlyPeek)
+                    self.advance(onlyPeek)
+                    return Token(NEQ, '!=')
+                
+                if  self.virtual_char  == '<' and self.peek() == '=':
+                    self.advance(onlyPeek)
+                    self.advance(onlyPeek)
+                    return Token(LTE, '<=')
+                
+                if  self.virtual_char  == '<':
+                    self.advance(onlyPeek)
+                    return Token(LT, '<')
+                
+                if  self.virtual_char  == '>' and self.peek() == '=':
+                    self.advance(onlyPeek)
+                    self.advance(onlyPeek)
+                    return Token(GTE, '>=')
+                
+                if  self.virtual_char  == '>':
+                    self.advance(onlyPeek)
+                    return Token(GT, '>')
+                
+                if  self.virtual_char == '&' and self.peek() == '&':
+                    self.advance(onlyPeek)
+                    self.advance(onlyPeek)
+                    return Token(AND, '&&')
+                
+                if   self.virtual_char == '|' and self.peek() == '|':
+                    self.advance(onlyPeek)
+                    self.advance(onlyPeek)
+                    return Token(OR, '||')
+                    
+                if self.virtual_char == '=':
+                    self.advance(onlyPeek)
+                    return Token(ASSIGN, '=')
+
+                if self.virtual_char == ';':
+                    self.advance(onlyPeek)
+                    return Token(SEMI, ';')
+
+                if self.virtual_char == ':':
+                    self.advance(onlyPeek)
+                    return Token(COLON, ':')
+
+                if self.virtual_char == ',':
+                    self.advance(onlyPeek)
+                    return Token(COMMA, ',')
+
+                if self.virtual_char == '+':
+                    self.advance(onlyPeek)
+                    return Token(PLUS, '+')
+
+                if self.virtual_char == '-':
+                    self.advance(onlyPeek)
+                    return Token(MINUS, '-')
+
+                if self.virtual_char == '*':
+                    self.advance(onlyPeek)
+                    return Token(MUL, '*')
+
+                if self.virtual_char == '/':
+                    self.advance(onlyPeek)
+                    return Token(INTEGER_DIV, '/')
+
+                if self.virtual_char == '(':
+                    self.advance(onlyPeek)
+                    return Token(LPAREN, '(')
+
+                if self.virtual_char == ')':
+                    self.advance(onlyPeek)
+                    return Token(RPAREN, ')')
+                
+                if self.virtual_char == '{':
+                    self.advance(onlyPeek)
+                    return Token(LCURLY, '{')
+
+                if  self.virtual_char == '}':
+                    self.advance(onlyPeek)
+                    return Token(RCURLY, '}')
+                        
+                self.error()
             
-            if self.current_char == '{':
-                self.advance()
-                return Token(LCURLY, '{')
+            return Token(EOF , None)
+        
+        
+        
+    
+    def peekNextToken(self):
+        #print('we are into the peekNexttoken function ')
+        self.virtual_pos = self.pos
+        if(self.virtual_pos> len(text)-1):
+            return
+        self.virtual_char = text[self.virtual_pos]
+        #print('virtual character is ' , self.virtual_char)
+        #print('next virtual character is ' , text[self.virtual_pos+1])
+        token = self.get_next_token(True)
+        return token
 
-            if  self.current_char == '}':
-                self.advance()
-                return Token(RCURLY, '}')
-                       
-            self.error()
-
-        return Token(EOF, None)
-
+    
 
 ###############################################################################
 #                                                                             #
@@ -376,11 +559,11 @@ class Parser(object):
 
     def program(self):
         """program : (Class_declarations)"""
-        print('we are at top of program')
+        #print('we are at top of program')
         class_declarations = []
-        print(self.current_token)
+        #print('current token is' , self.current_token)
+        #print('the next token is ' , self.lexer.peekNextToken())
         while self.current_token.type == CLASS:
-            print('we are inside program')
             node = self.ClassDeclaration()
             class_declarations.append(node)
         
@@ -389,19 +572,27 @@ class Parser(object):
     
     def ClassDeclaration(self):
         """ClassDeclaration : CLASS variable LCURLY class_body RCURLY"""
-        print('we are inside class declaration')
+        #print('we are inside class declaration')
         self.eat(CLASS)
-        print(self.current_token)
+        #print(self.current_token)
+        """ print('current token is' , self.current_token)
+        print('the next token is ' , self.lexer.peekNextToken()) """
         className = self.variable()
+        """ print('current token is' , self.current_token)
+        print('the next token is ' , self.lexer.peekNextToken()) """
         self.eat(LCURLY)
+        """ print('current token is' , self.current_token)
+        print('the next token is ' , self.lexer.peekNextToken()) """
         classBody = self.ClassBody()
+        """ print('current token is' , self.current_token)
+        print('the next token is ' , self.lexer.peekNextToken()) """
         self.eat(RCURLY)
         Class_node = ClassDeclaration(className, classBody)
         return Class_node
     
     def ClassBody(self):
         """
-            ClassBody : (field_declaration | constructor | method_Declaration)*
+            ClassBody : (field_declaration | constructor | method_Declaration | method call)*
         """
         class_body = []
         while self.current_token.type!=RCURLY:
@@ -488,8 +679,8 @@ class Parser(object):
                      | REAL
         """
         token = self.current_token
-        print('we are in type_spec ')
-        print(self.current_token)
+        #print('we are in type_spec ')
+        #print(self.current_token)
         if self.current_token.type == INTEGER:
             self.eat(INTEGER)
         else:
@@ -510,13 +701,23 @@ class Parser(object):
         """
         statement : declaration_statement
                   | assignment_statement
-                  | method call (must be inside expr)
-                  | expr 
+                  | method call
                   | empty
         """
         ##print('the current token inside statements is', self.current_token)
         if self.current_token.type == INTEGER  or self.current_token.type == FLOAT:
             node = self.declaration_statement()
+        elif self.current_token.type == ID and self.lexer.peekNextToken().type == LPAREN:
+            var_node = self.variable()
+            self.eat(LPAREN)
+            arguments = []
+            while self.current_token.type!=RPAREN:
+                val_node = self.expr()
+            self.eat(RPAREN)
+            print('we encountered a method call')
+            node = MethodCall(var_node , arguments)
+            self.eat(SEMI)
+            return node
         elif self.current_token.type == ID:
             node = self.assignment_statement()
         else:
@@ -541,7 +742,7 @@ class Parser(object):
     def variable_declaration(self):
         """variable_declaration : ID | ID ASSIGN expr"""
         var_node = self.variable()
-        print('current token is ', self.current_token)
+        #print('current token is ', self.current_token)
         token = None
         val_node = None
         if(self.current_token.type == ASSIGN):
@@ -722,8 +923,6 @@ class Parser(object):
             arguments = []
             while self.current_token.type!=RPAREN:
                 val_node = self.expr()
-                
-            
             self.eat(RPAREN)
             node = MethodCall(var_node , arguments)
             return node
@@ -880,6 +1079,7 @@ class SemanticAnalyzer(NodeVisitor):
 
     def visit_Block(self, node):
         for child in node.statements:
+            if(child inst
             self.visit(child)
             
     def visit_Assignment_statement(self , node):
@@ -953,6 +1153,10 @@ class SemanticAnalyzer(NodeVisitor):
             raise Exception(
                 "Error: Symbol(identifier) not found '%s'" % var_name
         )
+    
+    def visit_MethodCall(self, node):
+        print('function visited is' , node.name)  
+        return
 
 ###############################################################################
 #                                                                             #
