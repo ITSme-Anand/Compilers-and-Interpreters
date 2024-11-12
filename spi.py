@@ -425,7 +425,7 @@ class Parser(object):
                   | empty
         """
         #print('the current token inside statements is', self.current_token)
-        if self.current_token.type in [INTEGER | FLOAT]:
+        if self.current_token.type in [INTEGER , FLOAT]:
             node = self.declaration_statement()
         elif self.current_token.type == ID:
             node = self.assignment_statement()
@@ -960,7 +960,7 @@ class Interpreter(NodeVisitor):
         return self.visit(tree)
 
 
-text = open('hello.txt', 'r').read()
+text = open('5.ip', 'r').read()
 
 lexer = Lexer(text)
 parser = Parser(lexer)

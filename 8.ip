@@ -1,0 +1,16 @@
+/*
+Nested Method Calls in Expressions
+*/
+class TestNestedCalls {
+    int doubleValue(int x) {
+        x =  x * 2;
+    }
+
+    int square(int x) {
+        x =  x * x;
+    }
+
+    int compute() {
+        int result = doubleValue(square(4)); 
+    }
+}

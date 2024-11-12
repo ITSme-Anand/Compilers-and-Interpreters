@@ -1,0 +1,15 @@
+/*
+No-Parameter Methods and Field Updates
+*/
+class TestFieldUpdates {
+    int count = 0;
+
+    int increment() {
+        count = count + 1;
+    }
+
+    int start() {
+        increment();
+        increment(); 
+    }
+}

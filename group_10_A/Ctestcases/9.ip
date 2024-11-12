@@ -1,0 +1,12 @@
+/*
+Complex Nested Expressions
+*/
+int main() {
+    int a = 5, b = 10, c = 20, d = 30;
+    int result = (a + b) * (c - d) + ((a * c) / b) - d + (a * (b - d));
+   
+
+    float x = 2.5, y = 4.5;
+    float complexResult = (((x + y) * 3.0) - (x * y / 2.0)) + ((x + b) / (y - a + 1));
+    
+}

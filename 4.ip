@@ -1,0 +1,15 @@
+/*
+Method Declaration and Invocation
+*/
+
+class TestMethods {
+    int x = 5;
+
+    int add(int a, int b) {
+        int result = a + b;
+    }
+
+    int compute() {
+        add(x, 10); 
+    }
+}

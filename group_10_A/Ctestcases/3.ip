@@ -1,0 +1,12 @@
+/*
+tests  the declaration statments
+*/
+
+int main() {
+    int x = 10;
+    float y = 3.14;
+    int z;
+    float w;
+    z = x + 1;                  
+    w = y * 2;                  
+}

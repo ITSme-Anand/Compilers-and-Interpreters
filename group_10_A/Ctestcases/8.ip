@@ -1,0 +1,9 @@
+/*
+Complex Nested Expressions
+*/
+int main() {
+    int a = 5;
+    int b = 10;
+    int c = ((a + 2) * (b - 5)) / (a + 1);  
+    int d = (a > 2) && ((b - 5) == 5);      
+}

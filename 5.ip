@@ -1,0 +1,17 @@
+/*
+Method chaining
+*/
+
+class TestMethodChaining {
+    int add(int a, int b) {
+        return a + b;
+    }
+
+    int multiply(int a, int b) {
+        return a * b;
+    }
+
+    void calculate() {
+        int result = add(5, multiply(2, 3)); 
+    }
+}

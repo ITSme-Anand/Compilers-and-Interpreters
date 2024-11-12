@@ -1,19 +1,60 @@
-class Hello {
-
-    int a = 3, b = 2;
-    float c = 4;
-
-    Hello(){
-        float e = 5;
-        int a = 2;
-        int b = 4;
-        function2();
+class Hello{
+    int a = 2;
+    int b = 4;
+    int c = 6;
+    Hello(int e , int f){
+        a = e;
+        b = f;
+        int d = c*b + f;
     }
-    int function1(int f , int g , int h){
-        a = 3 + 5;
-        int c = 5+3;
-    }
-    int function2(){
-        function1();
+
+    int getSum(int a , int b){
+        a = a + b;
     }
 }
+
+class Anand{
+    int c = 2;
+    int d = 6;
+
+    Anand(){
+
+    }
+
+}
+
+class TestNestedCalls {
+    int a = 3;
+    int b , c = 2;
+    Hello h1 = new Hello(1, 2);
+    
+    TestNestedCalls(int a , float b , int c){
+        b = 5;
+    }
+    
+    
+    int doubleValue(int x , Hello h2) {
+        x =  x * 2;
+        h2 = new Hello(1,2);
+        x = h2.b;
+    }
+
+    int square(int x) {
+        x =  x * x;
+        doubleValue(1 , new Hello(1,2));
+    }
+
+    int compute(int a , int b) {
+        int c = a + b;
+    }
+
+    int main(){
+        int b = 2;
+        Hello h = new Hello(12.0 , 14), h1;
+        Hello h2 = new Hello(11, 19);
+        int e = h.b;
+        h2.a = 66;
+        h2.getSum(6,6);
+    }
+}
+

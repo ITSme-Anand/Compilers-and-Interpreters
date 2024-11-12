@@ -1,0 +1,14 @@
+/*
+tests the relational operators
+*/
+
+int main() {
+    int a = 10;
+    int b = 20;
+    int result1 = (a < b);     
+    int result2 = (a == b);     
+    int result3 = (a >= 10);    
+    float c = 5.5;
+    float d = 10.1;
+    int result4 = (c != d);     
+}

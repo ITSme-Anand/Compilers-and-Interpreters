@@ -1,0 +1,12 @@
+/*
+Deeply Nested Arithmetic Expressions
+*/
+int main() {
+    int a = 2, b = 4, c = 6, d = 8;
+    int nestedArithmetic = ((((a + b) * c) - (d / b)) + ((a * d) - (c * b)) + ((d + a) * (c - b)));
+    
+
+    float x = 1.5, y = 2.5, z = 3.5;
+    float nestedFloatCalc = ((((x + y) * z) - (y / x)) + ((z * x) - (y * z)) + ((y + x) * (z - x)));
+    
+}

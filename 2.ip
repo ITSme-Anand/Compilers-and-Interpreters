@@ -1,0 +1,13 @@
+/*
+Field Declarations with Initial Values
+*/
+
+class TestFields {
+    int x = 10;
+    float y = 20.5;
+    int z = x + 15; 
+    
+    int displayFields() {
+        int result = x + z; 
+    }
+}

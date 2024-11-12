@@ -1,0 +1,18 @@
+/*
+Combining Constructors, Methods, and Fields
+*/
+class TestComplexClass {
+    int value;
+
+    TestComplexClass(int initialValue) {
+        value = initialValue;
+    }
+
+    int increment(int x) {
+        x =  value + x;
+    }
+
+    int calculate() {
+        int result = increment(5); 
+    }
+}

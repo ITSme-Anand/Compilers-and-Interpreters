@@ -1,0 +1,16 @@
+/*
+Constructor with Parameters
+*/
+class TestParameterizedConstructor {
+    int x;
+    float y;
+
+    TestParameterizedConstructor(int a, float b) {
+        x = a;
+        y = b;
+    }
+
+    int display() {
+        int result = x + y;
+    }
+}

@@ -1,0 +1,10 @@
+/*
+tests the asisgnment statements
+*/
+
+int main() {
+    int a = 5;
+    int b = a + 10;             
+    float c = 2.5;
+    float d = c * 2;            
+}

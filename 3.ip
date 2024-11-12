@@ -1,0 +1,17 @@
+/*
+Constructors without Parameters
+*/
+
+class TestConstructor {
+    int x;
+    float y;
+
+    TestConstructor() {
+        x = 100;
+        y = 50.5;
+    }
+
+    int showValues() {
+        int total = x + y; 
+    }
+}
